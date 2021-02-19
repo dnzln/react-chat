@@ -1,48 +1,62 @@
-import React from 'react';
+import React, { Component } from 'react';
+import * as actions from './Chat/store/actions';
+import { connect } from 'react-redux';
 import Loader from './Chat/Loader';
 import ChatHeader from './Chat/ChatHeader';
 import ChatFooter from './Chat/ChatFooter';
 import ChatMessagesList from './Chat/ChatMessagesList';
 
-export default class Chat extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      messages: [],
-      isLoading: true,
-      participants: 0,
-      messagesTotal: 0,
-      lastMessageAt: 0,
-      userId: "id" + Math.random().toString(16).slice(2)
-    };
+class Chat extends Component {
+  constructor(props) {
+    super(props);
 
     this.getMessages();
-
+    
+    this.updateChatStats = this.updateChatStats.bind(this);
     this.deleteMessage = this.deleteMessage.bind(this);
     this.addMessage = this.addMessage.bind(this);
     this.updateMessage = this.updateMessage.bind(this);
-    this.likeMessage = this.likeMessage.bind(this);    
+    this.likeMessage = this.likeMessage.bind(this);
+    this.getTimeFromMs = this.getTimeFromMs.bind(this);
   }
 
-  getChatStat(messagesArray = this.state.messages) {
-    const messages = messagesArray;
-    let users = new Set();
+  getMessages() {
+    
+    fetch('https://edikdolynskyi.github.io/react_sources/messages.json')
+      .then(data => data.json())
+      .then(messages => {
+        
+        // this.props.changeState({ messages, where: 'getMessages'})
+        // console.log(this.props.messages);
+        // this.props.addMessagesData(messages);
+        this.updateChatStats(messages);
+        // this.c++;
+        // console.log(this.c);
+        // this.props.changeState({ isLoading: false, where: 'getMessages 2' });
+      })
+  }
+
+  updateChatStats(messagesArray = this.props.messages) {
+    // console.log(this.props.messages);
+    // console.log(this.props.messages2);
+    const messages = [...messagesArray];
+    let usersTotal = new Set();
     let messagesTotal = 0;
     let lastMessageAt = 0;
 
     messages.forEach(message => {
       messagesTotal++;
-      users.add(message.userId);
+      usersTotal.add(message.userId);
+      message.likes = message.likes || 0;
       message.date = new Date(message.createdAt);
+      message.time = this.getTimeFromMs(message.createdAt);
+
       const messageTime = Date.parse(message.createdAt) || message.createdAt;
       lastMessageAt = lastMessageAt < messageTime ? messageTime : lastMessageAt;
-      message.time = this.getTimeFromMs(message.createdAt);
-      message.likes = message.likes || 0;
     })
 
     lastMessageAt = this.getTimeFromMs(lastMessageAt);
-
-    this.setState({ ...this.state, messages, messagesTotal, lastMessageAt, participants: users.size });
+    this.props.changeState({ messages, messagesTotal, lastMessageAt, participants: usersTotal.size, isLoading: false, where: 'stat' });    
   }
 
   getTimeFromMs(ms) {
@@ -50,52 +64,33 @@ export default class Chat extends React.Component {
     return `${date.getHours()}:${date.getMinutes()}`
   }
 
-  getMessages() {
-    fetch('https://edikdolynskyi.github.io/react_sources/messages.json')
-      .then(data => data.json())
-      .then(messages => {
-        this.setState({ messages });
-        this.getChatStat();
-        this.setState({ ...this.state, isLoading: false });
-      })
-  }
-
   likeMessage(id) {
-    const messages = this.state.messages.map(message => {
-      if (message.id === id) message.likes = message.likes > 0 ? 0 : 1;
-      return message;
-    });
-    this.getChatStat(messages);
+    this.props.likeMessage(id);
+    // console.log(this.props.messages);
+    this.updateChatStats();
   }
 
   addMessage(text) {
-    const messages = this.state.messages.concat([{
-      text: text,
-      createdAt: Date.now(),
-      id: "id" + Math.random().toString(16).slice(2),
-      userId: this.state.userId,
-      isOwn: true,
-    }]);
-    this.getChatStat(messages);
+    this.props.addNewMessage(text);
+    // console.log(this.props.messages);
+    this.updateChatStats();
   }
 
   deleteMessage(id) {
-    const messages = this.state.messages.filter(message => message.id !== id);
-    this.getChatStat(messages);
+    this.props.deleteMessage(id);
+    this.updateChatStats();
   }
 
   updateMessage(text, id) {
-    const messages = this.state.messages.map(message => {
-      if (message.id === id) message.text = text;
-      return message;
-    });
-    this.getChatStat(messages);
+    this.props.updateMessage(text, id);
+    this.updateChatStats();
   }
   
   render() {
-    const state = this.state;
+    // const state = this.props;
+    // console.log(this.props.messages);
 
-    if (state.isLoading) return (<Loader></Loader>);
+    if (this.props.isLoading) return (<Loader></Loader>);
 
     return (
       <div>
@@ -105,14 +100,15 @@ export default class Chat extends React.Component {
         <div className="container">
           <div className="card chat-container">
             <ChatHeader
-              participants={state.participants}
-              messagesTotal={state.messagesTotal}
-              lastMessageAt={state.lastMessageAt}
+              participants={this.props.participants}
+              messagesTotal={this.props.messagesTotal}
+              lastMessageAt={this.props.lastMessageAt}
             ></ChatHeader>
             <div className="card-body">
               <div className="messages-container">
                 <ChatMessagesList
-                  messages={state.messages}
+                  props={this.props}
+                  messages={this.props.messages}
                   deleteMessage={this.deleteMessage}
                   updateMessage={this.updateMessage}
                   likeMessage={this.likeMessage}
@@ -130,3 +126,21 @@ export default class Chat extends React.Component {
     )
   }
 }
+
+const mapStateToProps = (state) => {
+    return {
+      messages: state.messages,
+      messages2: state.messages2,
+      isLoading: state.isLoading,
+      participants: state.participants,
+      messagesTotal: state.messagesTotal,
+      lastMessageAt: state.lastMessageAt,
+      userId: state.userId
+    }
+};
+
+const mapDispatchToProps = {
+    ...actions
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Chat);

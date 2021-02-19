@@ -7,6 +7,7 @@ import ChatDaySeparator from './ChatDaySeparator';
 export default class ChatMessagesList extends React.Component {
 
   render() {
+    // console.log(this.props.props);
     let prevDate = this.props.messages[0].date.getDate();
     return (    
       this.props.messages.map((message) => {
