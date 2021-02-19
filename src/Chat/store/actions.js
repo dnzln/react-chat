@@ -1,10 +1,19 @@
-import { ADD_NEW_MESSAGE, UPLOAD_MESSAGES, CHANGE_STATE, LIKE_MESSAGE, REMOVE_MESSAGE, UPDATE_MESSAGE } from "./actionsTypes";
+import { ADD_NEW_MESSAGE, UPDATE_CHAT_STAT, UPLOAD_MESSAGES, CHANGE_STATE, LIKE_MESSAGE, REMOVE_MESSAGE, UPDATE_MESSAGE } from "./actionsTypes";
 
 
-export const addMessagesData = messages => ({
+export const updateChatStatistic = ({membersTotal, messagesTotal, lastMessageAt}) => ({
+    type: UPDATE_CHAT_STAT,
+    payload: {
+      membersTotal,
+      messagesTotal,
+      lastMessageAt
+    }
+});
+
+export const addMessagesData = state => ({
     type: UPLOAD_MESSAGES,
     payload: {
-        messages
+        state
     }
 });
 
@@ -15,9 +24,12 @@ export const changeState = state => ({
     }
 });
 
-export const addNewMessage = (text) => ({
+export const addNewMessage = (text, id) => ({
     type: ADD_NEW_MESSAGE,
-    text
+    payload: {
+      text,
+      id
+    }
 });
 
 export const likeMessage = (id) => ({

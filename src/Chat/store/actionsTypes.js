@@ -4,4 +4,5 @@ export const LIKE_MESSAGE = "LIKE_MESSAGE";
 export const ADD_NEW_MESSAGE = "ADD_NEW_MESSAGE";
 export const CHANGE_STATE = "CHANGE_STATE";
 export const UPLOAD_MESSAGES = "UPLOAD_MESSAGES";
+export const UPDATE_CHAT_STAT = "UPDATE_CHAT_STAT";
 

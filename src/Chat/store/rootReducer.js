@@ -1,12 +1,15 @@
-import { ADD_NEW_MESSAGE, UPLOAD_MESSAGES, LIKE_MESSAGE, REMOVE_MESSAGE, UPDATE_MESSAGE, CHANGE_STATE } from "./actionsTypes";
+import { getNewId, getTimeFromMs } from "../service";
+import { ADD_NEW_MESSAGE, UPLOAD_MESSAGES, UPDATE_CHAT_STAT, LIKE_MESSAGE, REMOVE_MESSAGE, UPDATE_MESSAGE } from "./actionsTypes";
 
 export default function rootReducer(state, action) {
   switch (action.type) {
-    case CHANGE_STATE: return { ...state, ...action.payload.state };
+    case UPDATE_CHAT_STAT: {
+      return { ...state, ...action.payload };
+    }
 
     case UPLOAD_MESSAGES: {
-      const {messages} = action.payload;
-      return { ...state, messages };
+      const newState = action.payload.state;
+      return { ...state, ...newState };
     }
 
     case REMOVE_MESSAGE: {
@@ -21,6 +24,7 @@ export default function rootReducer(state, action) {
       });
       return { ...state, messages };
     }
+      
     case LIKE_MESSAGE: {
       const messages = state.messages.map(message => {
       if (message.id === action.id) message.likes = message.likes > 0 ? 0 : 1;
@@ -28,13 +32,17 @@ export default function rootReducer(state, action) {
       });
       return { ...state, messages };
     }
+      
     case ADD_NEW_MESSAGE: {
       let newMessage = {
-        text: action.text,
+        text: action.payload.text,
+        userId: action.payload.id,
         createdAt: Date.now(),
-        id: "id" + Math.random().toString(16).slice(2),
-        userId: state.userId,
+        date: new Date(),
         isOwn: true,
+        likes: 0,
+        time: getTimeFromMs(Date.now()),
+        id: getNewId(),
       };
       
       return {
