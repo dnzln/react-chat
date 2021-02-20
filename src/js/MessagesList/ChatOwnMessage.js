@@ -10,12 +10,15 @@ export default class ChatOwnMessage extends React.Component {
     const time = this.props.time;
     const id = this.props.id;
     const likes = this.props.likes;
+    const ownMessages = this.props.messages.filter(mes => mes.isOwn);
+    const isLastOne = ownMessages[ownMessages.length - 1].id === id;
+    const editBtn = (isLastOne) ? <button className="edit-btn" data-toggle="modal" data-target="#exampleModal">&#9998;</button> : null;
 
     return (
       <div className="alert alert-light chat-own-message" role="alert">
         
         <div className="message-user-controls">
-          <button className="edit-btn" data-toggle="modal" data-target="#exampleModal">&#9998;</button>
+          {editBtn}
           <button onClick={() => { deleteMessage(id) }} className="remove-btn">&#x2716;</button>
         </div>
         <p className="message-text">{ text }</p>

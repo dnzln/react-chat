@@ -1,20 +1,17 @@
 import React, { Component } from 'react';
-import * as actions from './Chat/store/actions';
+import * as actions from '../store/actions';
 import { connect } from 'react-redux';
-import Loader from './Chat/Loader';
-import ChatHeader from './Chat/ChatHeader';
-import ChatFooter from './Chat/ChatFooter';
-import ChatMessagesList from './Chat/ChatMessagesList';
-import { getNewId, getTimeFromMs } from './Chat/service';
+import Loader from '../ChatDecoration/Loader';
+import ChatHeader from './ChatHeader';
+import ChatFooter from './ChatFooter';
+import ChatMessagesList from '../MessagesList/ChatMessagesList';
+import { getNewId, getTimeFromMs } from '../service';
 
 class Chat extends Component {
   constructor(props) {
     super(props);
 
     this.id = getNewId();
-    // this.getTimeFromMs = this.getTimeFromMs.bind(this);
-    // this.getChatStats = this.getChatStats.bind(this);
-    // this.extendMessageData = this.extendMessageData.bind(this);
     this.deleteMessage = this.deleteMessage.bind(this);
     this.addMessage = this.addMessage.bind(this);
     this.updateMessage = this.updateMessage.bind(this);
@@ -29,6 +26,13 @@ class Chat extends Component {
         const chatStatistic = this.getChatStats(messages);
         this.props.addMessagesData({ messages, ...chatStatistic, isLoading: false });
       })
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.messages.length !== this.props.messages.length) {
+      const chatStatistic = this.getChatStats(this.props.messages);
+      this.props.updateChatStatistic(chatStatistic);
+    }
   }
 
   extendMessageData(messages) {
@@ -56,6 +60,19 @@ class Chat extends Component {
     return { membersTotal, messagesTotal, lastMessageAt, };
   }
 
+  createNewMessage(text) {
+    return {
+      text: text,
+      userId: this.id,
+      createdAt: Date.now(),
+      date: new Date(),
+      isOwn: true,
+      likes: 0,
+      time: getTimeFromMs(Date.now()),
+      id: getNewId(),
+    };
+  }
+
   likeMessage(id) {
     this.props.likeMessage(id);
   }
@@ -65,15 +82,13 @@ class Chat extends Component {
   }
 
   addMessage(text) {
-    this.props.addNewMessage(text, this.id);
-    const chatStatistic = this.getChatStats(this.props.messages);
-    this.props.updateChatStatistic(chatStatistic);
+    const message = this.createNewMessage(text);
+    this.props.addNewMessage(message);
+    
   }
 
   deleteMessage(id) {
     this.props.removeMessage(id);
-    const chatStatistic = this.getChatStats(this.props.messages);
-    this.props.updateChatStatistic(chatStatistic);
   }
   
   render() {

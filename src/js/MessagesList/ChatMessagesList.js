@@ -2,12 +2,11 @@
 import React from 'react';
 import ChatMessage from './ChatMessage';
 import ChatOwnMessage from './ChatOwnMessage';
-import ChatDaySeparator from './ChatDaySeparator';
+import ChatDaySeparator from '../ChatDecoration/ChatDaySeparator';
 
 export default class ChatMessagesList extends React.Component {
 
   render() {
-    console.log(this.props);
     let prevDate = this.props.messages[0].date.getDate();
     return (    
       this.props.messages.map((message) => {
@@ -26,6 +25,7 @@ export default class ChatMessagesList extends React.Component {
 
         if (message.isOwn) {
           result.push(<ChatOwnMessage
+            messages={this.props.messages}
             likes={message.likes}
             user={message.name}
             text={message.text}

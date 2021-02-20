@@ -1,4 +1,3 @@
-import { getNewId, getTimeFromMs } from "../service";
 import { ADD_NEW_MESSAGE, UPLOAD_MESSAGES, UPDATE_CHAT_STAT, LIKE_MESSAGE, REMOVE_MESSAGE, UPDATE_MESSAGE } from "./actionsTypes";
 
 export default function rootReducer(state, action) {
@@ -34,20 +33,9 @@ export default function rootReducer(state, action) {
     }
       
     case ADD_NEW_MESSAGE: {
-      let newMessage = {
-        text: action.payload.text,
-        userId: action.payload.id,
-        createdAt: Date.now(),
-        date: new Date(),
-        isOwn: true,
-        likes: 0,
-        time: getTimeFromMs(Date.now()),
-        id: getNewId(),
-      };
-      
       return {
         ...state,
-        messages: [...state.messages, newMessage]
+        messages: [...state.messages, action.payload.message]
       };
     }
     

@@ -106,11 +106,15 @@ code {
   align-items: center;
 }
 
+.chat-own-message:hover .message-user-controls {
+  display: flex;
+}
+
 .message-user-controls {
+  display: none;
   position: absolute;
   right: 20px;
   top: 10px;
-  display: flex;
   align-items: center;
 }
 
